@@ -28,24 +28,6 @@ public class UserRepository {
         }
     }
 
-    public void addActivity(int tgId, String category, Time activityTime) {
-        String query = "INSERT INTO activities (user_id, category, activity_time) VALUES ((SELECT id FROM Users WHERE tg_id = ?), ?, ?)";
-
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-
-            statement.setInt(1, tgId);
-            statement.setString(2, category);
-            statement.setTime(3, activityTime);
-            statement.executeUpdate();
-
-            logger.log(Level.INFO, "Activity added successfully: tgId={0}, category={1}, activityTime={2}", new Object[]{tgId, category, activityTime});
-
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error adding activity: tgId=" + tgId + ", category=" + category + ", activityTime=" + activityTime, e);
-        }
-    }
-
     public String getUserNameByTgId(int tgId) {
         String query = "SELECT user_name FROM Users WHERE tg_id = ?";
         String userName = null;
@@ -68,5 +50,26 @@ public class UserRepository {
         }
 
         return userName;
+    }
+
+    public int getUserIdByTgId(int tgId) {
+        String query = "SELECT id FROM Users WHERE tg_id = ?";
+        int userId = -1;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, tgId);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                userId = resultSet.getInt("id");
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error retrieving user id for tgId=" + tgId, e);
+        }
+
+        return userId;
     }
 }
