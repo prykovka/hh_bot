@@ -49,22 +49,25 @@ public class ActivityRepository {
         return activityTime;
     }
 
-    public void updateActivityTime(int tgId, String category, Time newTime) {
-        String query = "UPDATE activities SET activity_time = ? WHERE user_id = (SELECT id FROM Users WHERE tg_id = ?) AND category = ?";
+    public String getUserNameByTgId(int tgId) {
+        String query = "SELECT user_name FROM Users WHERE tg_id = ?";
+        String userName = null;
 
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
-            statement.setTime(1, newTime);
-            statement.setInt(2, tgId);
-            statement.setString(3, category);
-            statement.executeUpdate();
+            statement.setInt(1, tgId);
+            ResultSet resultSet = statement.executeQuery();
 
-            logger.log(Level.INFO, "Activity time updated successfully: tgId={0}, category={1}, newTime={2}", new Object[]{tgId, category, newTime});
+            if (resultSet.next()) {
+                userName = resultSet.getString("user_name");
+            }
 
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error updating activity time: tgId=" + tgId + ", category=" + category + ", newTime=" + newTime, e);
+            logger.log(Level.SEVERE, "Error retrieving user name by tgId: " + tgId, e);
         }
+
+        return userName;
     }
 
     public List<Reminder> getAllReminders() {

@@ -1,21 +1,21 @@
 package org.example;
 
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.request.ForceReply;
-import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
-import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.example.config.ConfigLoader;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.ForceReply;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import org.example.database.UserRepository;
-import org.example.database.ActivityRepository;
-import org.example.database.CustomReminderRepository;
 import org.example.menu.Menu;
-import org.example.message.MessageHandler;
 import org.example.reminder.ReminderJob;
 import org.example.reminder.ReminderScheduler;
+import org.example.message.MessageHandler;
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
 
 import java.sql.Time;
 import java.util.logging.Level;
@@ -24,25 +24,31 @@ import java.util.logging.Logger;
 public class Main {
     private static final Logger logger = Logger.getLogger(Main.class.getName());
     private static TelegramBot bot;
-    private static ActivityRepository activityRepository;
+    private static UserRepository userRepository;
+    private static Scheduler scheduler;
 
     public static void main(String[] args) {
         String botToken = ConfigLoader.getProperty("bot.token");
 
         bot = new TelegramBot(botToken);
-        UserRepository userRepository = new UserRepository();
-        activityRepository = new ActivityRepository();
-        CustomReminderRepository customReminderRepository = new CustomReminderRepository();
+        userRepository = new UserRepository();
 
-        // Set the bot in ReminderJob
-        ReminderJob.setBot(bot);
+        try {
+            scheduler = StdSchedulerFactory.getDefaultScheduler();
+            scheduler.start();
+            ReminderJob.setBot(bot);
+            ReminderJob.setUserRepository(userRepository);
+        } catch (SchedulerException e) {
+            logger.log(Level.SEVERE, "Failed to start scheduler", e);
+        }
 
-        ReminderScheduler.scheduleExistingReminders(activityRepository, customReminderRepository);
+        MessageHandler.setBot(bot);
+        MessageHandler.setUserRepository(userRepository);
 
         bot.setUpdatesListener(updates -> {
             for (Update update : updates) {
                 if (update.message() != null && update.message().text() != null) {
-                    MessageHandler.handleIncomingMessage(update);
+                    MessageHandler.handleIncomingMessage(bot,update);
                 } else if (update.callbackQuery() != null) {
                     handleCallbackQuery(update);
                 }
@@ -50,10 +56,7 @@ public class Main {
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
         });
 
-        MessageHandler.setBot(bot);
-        MessageHandler.setUserRepository(userRepository);
-        MessageHandler.setActivityRepository(activityRepository);
-        MessageHandler.setCustomReminderRepository(customReminderRepository);
+        ReminderScheduler.scheduleExistingReminders(userRepository);
     }
 
     private static void handleCallbackQuery(Update update) {
@@ -63,27 +66,24 @@ public class Main {
 
         if (callbackData.equals("water") || callbackData.equals("exercise") ||
                 callbackData.equals("sleep") || callbackData.equals("education") ||
-                callbackData.equals("walk") || callbackData.equals("read") || callbackData.equals("custom")) {
+                callbackData.equals("walk") || callbackData.equals("read")) {
             MessageHandler.setCurrentCategory(callbackData);
-            if (callbackData.equals("custom")) {
-                SendMessage customReminderMessage = new SendMessage(chatId, "О чем вы хотите, чтобы мы вам напомнили? (например, почистить зубы)").replyMarkup(new ForceReply());
-                bot.execute(customReminderMessage);
+            Time existingTime = userRepository.getActivityTime(chatId, callbackData);
+            if (existingTime != null) {
+                InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(
+                        new InlineKeyboardButton("Нет").callbackData("no_change"));
+                SendMessage message = new SendMessage(chatId, "У вас уже установлено напоминание для " + callbackData + " на " + existingTime.toString() + ". Хотите изменить его время? Пожалуйста, введите новое время в формате HH:MM.")
+                        .replyMarkup(inlineKeyboard);
+                bot.execute(message);
             } else {
-                Time existingTime = activityRepository.getActivityTime(chatId, callbackData);
-                if (existingTime != null) {
-                    InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(
-                            new InlineKeyboardButton("Нет").callbackData("no_change"));
-                    SendMessage message = new SendMessage(chatId, "У вас уже установлено напоминание для " + callbackData + " на " + existingTime.toString() + ". Хотите изменить его время? Пожалуйста, введите новое время в формате HH:MM.")
-                            .replyMarkup(inlineKeyboard);
-                    bot.execute(message);
-                } else {
-                    SendMessage requestTimeMessage = new SendMessage(chatId, "Выберите время для напоминания в формате HH:MM (например, 17:30)")
-                            .replyMarkup(new ForceReply());
-                    bot.execute(requestTimeMessage);
-                }
+                SendMessage requestTimeMessage = new SendMessage(chatId, "Выберите время для напоминания в формате HH:MM (например, 17:30)")
+                        .replyMarkup(new ForceReply());
+                bot.execute(requestTimeMessage);
             }
         } else if (callbackData.equals("no_change")) {
             bot.execute(new DeleteMessage(chatId, messageId));
+            SendMessage menuMessage = new SendMessage(chatId, "Выберите привычку:").replyMarkup(Menu.getCategoryMenu());
+            bot.execute(menuMessage);
         }
     }
 }

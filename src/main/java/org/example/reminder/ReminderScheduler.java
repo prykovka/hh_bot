@@ -1,7 +1,7 @@
 package org.example.reminder;
 
-import org.example.database.ActivityRepository;
-import org.example.database.CustomReminderRepository;
+import org.example.database.UserRepository;
+import org.example.reminder.ReminderJob;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
@@ -40,17 +40,15 @@ public class ReminderScheduler {
             }
 
             scheduler.scheduleJob(job, trigger);
-            logger.log(Level.INFO, "Scheduled reminder: userId={0}, category={1}, activityTime={2}", new Object[]{userId, category, activityTime});
         } catch (SchedulerException e) {
             logger.log(Level.SEVERE, "Failed to schedule reminder for userId=" + userId + ", category=" + category, e);
         }
     }
 
-    public static void scheduleExistingReminders(ActivityRepository activityRepository, CustomReminderRepository customReminderRepository) {
+    public static void scheduleExistingReminders(UserRepository userRepository) {
         try {
-            for (ActivityRepository.Reminder reminder : activityRepository.getAllReminders()) {
-                String reminderCategory = reminder.getCategory();
-                scheduleReminder(reminder.getUserId(), reminderCategory, reminder.getActivityTime());
+            for (UserRepository.Reminder reminder : userRepository.getAllReminders()) {
+                scheduleReminder(reminder.getUserId(), reminder.getCategory(), reminder.getActivityTime());
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Failed to schedule existing reminders", e);

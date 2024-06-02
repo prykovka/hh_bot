@@ -13,9 +13,6 @@ public class Menu {
                 new InlineKeyboardButton[]{
                         new InlineKeyboardButton("Сон\uD83D\uDCA4").callbackData("sleep"),
                         new InlineKeyboardButton("Чтение\uD83D\uDCDA").callbackData("read")
-                },
-                new InlineKeyboardButton[]{
-                        new InlineKeyboardButton("Кастомное").callbackData("custom")
                 }
         );
     }
