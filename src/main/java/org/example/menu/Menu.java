@@ -7,12 +7,25 @@ public class Menu {
     public static InlineKeyboardMarkup getCategoryMenu() {
         return new InlineKeyboardMarkup(
                 new InlineKeyboardButton[]{
-                        new InlineKeyboardButton("Вода\uD83D\uDCA6").callbackData("water"),
-                        new InlineKeyboardButton("Спорт\uD83D\uDCAA").callbackData("exercise")
+                        new InlineKeyboardButton("Вода💧").callbackData("water"),
+                        new InlineKeyboardButton("Спорт💪").callbackData("exercise")
                 },
                 new InlineKeyboardButton[]{
-                        new InlineKeyboardButton("Сон\uD83D\uDCA4").callbackData("sleep"),
-                        new InlineKeyboardButton("Чтение\uD83D\uDCDA").callbackData("read")
+                        new InlineKeyboardButton("Сон💤").callbackData("sleep"),
+                        new InlineKeyboardButton("Чтение📚").callbackData("read")
+                }
+        );
+    }
+
+    public static InlineKeyboardMarkup getFactsMenu() {
+        return new InlineKeyboardMarkup(
+                new InlineKeyboardButton[]{
+                        new InlineKeyboardButton("Вода💧").callbackData("fact_water"),
+                        new InlineKeyboardButton("Спорт💪").callbackData("fact_exercise")
+                },
+                new InlineKeyboardButton[]{
+                        new InlineKeyboardButton("Сон💤").callbackData("fact_sleep"),
+                        new InlineKeyboardButton("Чтение📚").callbackData("fact_read")
                 }
         );
     }

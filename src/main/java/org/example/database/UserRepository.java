@@ -138,6 +138,32 @@ public class UserRepository {
         return reminders;
     }
 
+    public List<Reminder> getAllRemindersForUser(int tgId) {
+        String query = "SELECT a.category, a.activity_time FROM activities a JOIN users u ON a.user_id = u.id WHERE u.tg_id = ?";
+        List<Reminder> reminders = new ArrayList<>();
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, tgId);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                String category = resultSet.getString("category");
+                Time activityTime = resultSet.getTime("activity_time");
+
+                reminders.add(new Reminder(tgId, category, activityTime));
+            }
+
+            logger.log(Level.INFO, "Retrieved {0} reminders for user {1} from the database", new Object[]{reminders.size(), tgId});
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error retrieving reminders for user " + tgId, e);
+        }
+
+        return reminders;
+    }
+
     public static class Reminder {
         private final int userId;
         private final String category;

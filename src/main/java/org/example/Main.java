@@ -18,6 +18,9 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
 import java.sql.Time;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,7 +28,16 @@ public class Main {
     private static final Logger logger = Logger.getLogger(Main.class.getName());
     private static TelegramBot bot;
     private static UserRepository userRepository;
-    private static Scheduler scheduler;
+
+    public static final Map<String, String> categoryTranslations = new HashMap<>();
+    static {
+        categoryTranslations.put("read", "Чтение");
+        categoryTranslations.put("sleep", "Сон");
+        categoryTranslations.put("exercise", "Тренировки");
+        categoryTranslations.put("water", "Вода");
+//        categoryTranslations.put("education", "Обучение");
+//        categoryTranslations.put("walk", "Прогулки");
+    }
 
     public static void main(String[] args) {
         String botToken = ConfigLoader.getProperty("bot.token");
@@ -34,7 +46,7 @@ public class Main {
         userRepository = new UserRepository();
 
         try {
-            scheduler = StdSchedulerFactory.getDefaultScheduler();
+            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             ReminderJob.setBot(bot);
             ReminderJob.setUserRepository(userRepository);
@@ -48,7 +60,7 @@ public class Main {
         bot.setUpdatesListener(updates -> {
             for (Update update : updates) {
                 if (update.message() != null && update.message().text() != null) {
-                    MessageHandler.handleIncomingMessage(bot,update);
+                    MessageHandler.handleIncomingMessage(bot, update);
                 } else if (update.callbackQuery() != null) {
                     handleCallbackQuery(update);
                 }
@@ -64,19 +76,19 @@ public class Main {
         int chatId = update.callbackQuery().message().chat().id().intValue();
         int messageId = update.callbackQuery().message().messageId();
 
-        if (callbackData.equals("water") || callbackData.equals("exercise") ||
-                callbackData.equals("sleep") || callbackData.equals("education") ||
-                callbackData.equals("walk") || callbackData.equals("read")) {
+        if (categoryTranslations.containsKey(callbackData)) {
             MessageHandler.setCurrentCategory(callbackData);
             Time existingTime = userRepository.getActivityTime(chatId, callbackData);
             if (existingTime != null) {
+                String translatedCategory = categoryTranslations.get(callbackData);
+                String formattedTime = new SimpleDateFormat("HH:mm").format(existingTime);
                 InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(
                         new InlineKeyboardButton("Нет").callbackData("no_change"));
-                SendMessage message = new SendMessage(chatId, "У вас уже установлено напоминание для " + callbackData + " на " + existingTime.toString() + ". Хотите изменить его время? Пожалуйста, введите новое время в формате HH:MM.")
+                SendMessage message = new SendMessage(chatId, "У вас уже установлено напоминание для \"" + translatedCategory + "\" на " + formattedTime + ".\nХотите изменить его время? Пожалуйста, введите новое время в формате HH:MM.")
                         .replyMarkup(inlineKeyboard);
                 bot.execute(message);
             } else {
-                SendMessage requestTimeMessage = new SendMessage(chatId, "Выберите время для напоминания в формате HH:MM (например, 17:30)")
+                SendMessage requestTimeMessage = new SendMessage(chatId, "Выберите время в формате HH:MM (например, 17:30)")
                         .replyMarkup(new ForceReply());
                 bot.execute(requestTimeMessage);
             }
@@ -84,6 +96,9 @@ public class Main {
             bot.execute(new DeleteMessage(chatId, messageId));
             SendMessage menuMessage = new SendMessage(chatId, "Выберите привычку:").replyMarkup(Menu.getCategoryMenu());
             bot.execute(menuMessage);
+        } else {
+            MessageHandler.handleCallbackQuery(bot, update);
         }
     }
+
 }
