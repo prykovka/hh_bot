@@ -164,6 +164,23 @@ public class UserRepository {
         return reminders;
     }
 
+    public void deleteActivity(int tgId, String category) {
+        String query = "DELETE FROM activities WHERE user_id = (SELECT id FROM Users WHERE tg_id = ?) AND category = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, tgId);
+            statement.setString(2, category);
+            statement.executeUpdate();
+
+            logger.log(Level.INFO, "Activity deleted successfully: tgId={0}, category={1}", new Object[]{tgId, category});
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error deleting activity: tgId=" + tgId + ", category=" + category, e);
+        }
+    }
+
     public static class Reminder {
         private final int userId;
         private final String category;

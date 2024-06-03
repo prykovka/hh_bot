@@ -40,7 +40,7 @@ public class MessageHandler {
             SendMessage welcomeMessage = new SendMessage(chatId, "Добро пожаловать! Используйте команду /menu для выбора привычек.");
             bot.execute(welcomeMessage);
         } else if (messageText.equals("/menu")) {
-            SendMessage menuMessage = new SendMessage(chatId, "Выберите привычку:").replyMarkup(Menu.getCategoryMenu());
+            SendMessage menuMessage = new SendMessage(chatId, "Выберите полезное дело:").replyMarkup(Menu.getCategoryMenu());
             bot.execute(menuMessage);
         } else if (messageText.equals("/settings")) {
             handleSettingsCommand(chatId);
@@ -104,6 +104,11 @@ public class MessageHandler {
             String fact = Facts.getRandomFact(category);
             SendMessage factMessage = new SendMessage(chatId, fact);
             bot.execute(factMessage);
+        } else if (callbackData.startsWith("delete_")) {
+            String category = callbackData.replace("delete_", "");
+            userRepository.deleteActivity(chatId, category);
+            SendMessage deleteConfirmationMessage = new SendMessage(chatId, "Ваше напоминание для \"" + Main.categoryTranslations.get(category) + "\" было удалено.");
+            bot.execute(deleteConfirmationMessage);
         }
     }
 

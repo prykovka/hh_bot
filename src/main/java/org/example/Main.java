@@ -83,7 +83,9 @@ public class Main {
                 String translatedCategory = categoryTranslations.get(callbackData);
                 String formattedTime = new SimpleDateFormat("HH:mm").format(existingTime);
                 InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(
-                        new InlineKeyboardButton("Нет").callbackData("no_change"));
+                        new InlineKeyboardButton("Оставить").callbackData("no_change"),
+                        new InlineKeyboardButton("Удалить").callbackData("delete_" + callbackData)
+                );
                 SendMessage message = new SendMessage(chatId, "У вас уже установлено напоминание для \"" + translatedCategory + "\" на " + formattedTime + ".\nХотите изменить его время? Пожалуйста, введите новое время в формате HH:MM.")
                         .replyMarkup(inlineKeyboard);
                 bot.execute(message);
@@ -100,5 +102,4 @@ public class Main {
             MessageHandler.handleCallbackQuery(bot, update);
         }
     }
-
 }
