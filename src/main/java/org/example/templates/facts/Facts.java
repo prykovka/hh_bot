@@ -1,4 +1,4 @@
-package org.example.facts;
+package org.example.templates.facts;
 
 import java.util.HashMap;
 import java.util.Map;

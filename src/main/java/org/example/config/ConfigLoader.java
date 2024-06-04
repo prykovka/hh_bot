@@ -22,4 +22,17 @@ public class ConfigLoader {
     public static String getProperty(String key) {
         return properties.getProperty(key);
     }
+
+    public static int getIntProperty(String key) {
+        String value = properties.getProperty(key);
+        if (value != null) {
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                System.out.println("Unable to parse integer property: " + key);
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
 }

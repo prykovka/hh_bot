@@ -10,10 +10,9 @@ import com.pengrad.telegrambot.model.request.ForceReply;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import org.example.database.UserRepository;
-import org.example.menu.Menu;
 import org.example.reminder.ReminderJob;
 import org.example.reminder.ReminderScheduler;
-import org.example.message.MessageHandler;
+import org.example.handler.MessageHandler;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
@@ -35,12 +34,11 @@ public class Main {
         categoryTranslations.put("sleep", "Сон");
         categoryTranslations.put("exercise", "Тренировки");
         categoryTranslations.put("water", "Вода");
-//        categoryTranslations.put("education", "Обучение");
-//        categoryTranslations.put("walk", "Прогулки");
     }
 
     public static void main(String[] args) {
         String botToken = ConfigLoader.getProperty("bot.token");
+        int adminId = ConfigLoader.getIntProperty("bot.admin");
 
         bot = new TelegramBot(botToken);
         userRepository = new UserRepository();
@@ -56,6 +54,7 @@ public class Main {
 
         MessageHandler.setBot(bot);
         MessageHandler.setUserRepository(userRepository);
+        MessageHandler.setAdminId(adminId);
 
         bot.setUpdatesListener(updates -> {
             for (Update update : updates) {
@@ -86,18 +85,16 @@ public class Main {
                         new InlineKeyboardButton("Оставить").callbackData("no_change"),
                         new InlineKeyboardButton("Удалить").callbackData("delete_" + callbackData)
                 );
-                SendMessage message = new SendMessage(chatId, "У вас уже установлено напоминание для \"" + translatedCategory + "\" на " + formattedTime + ".\nХотите изменить его время? Пожалуйста, введите новое время в формате HH:MM.")
+                SendMessage message = new SendMessage(chatId, "У тебя уже установлено напоминание для \"" + translatedCategory + "\" на " + formattedTime + ".\nХотите изменить его время? Пожалуйста, введите новое время в формате HH:MM.")
                         .replyMarkup(inlineKeyboard);
                 bot.execute(message);
             } else {
-                SendMessage requestTimeMessage = new SendMessage(chatId, "Выберите время в формате HH:MM (например, 17:30)")
+                SendMessage requestTimeMessage = new SendMessage(chatId, "Выбери время в формате HH:MM (например, 17:30)")
                         .replyMarkup(new ForceReply());
                 bot.execute(requestTimeMessage);
             }
         } else if (callbackData.equals("no_change")) {
             bot.execute(new DeleteMessage(chatId, messageId));
-            SendMessage menuMessage = new SendMessage(chatId, "Выберите привычку:").replyMarkup(Menu.getCategoryMenu());
-            bot.execute(menuMessage);
         } else {
             MessageHandler.handleCallbackQuery(bot, update);
         }

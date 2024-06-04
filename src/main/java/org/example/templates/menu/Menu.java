@@ -1,4 +1,4 @@
-package org.example.menu;
+package org.example.templates.menu;
 
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;

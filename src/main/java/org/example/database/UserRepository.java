@@ -113,7 +113,7 @@ public class UserRepository {
     }
 
     public List<Reminder> getAllReminders() {
-        String query = "SELECT u.tg_id, a.category, a.activity_time FROM activities a JOIN Users u ON a.user_id = u.id";
+        String query = "SELECT u.tg_id, a.category, a.activity_time, a.streak_num FROM activities a JOIN Users u ON a.user_id = u.id";
         List<Reminder> reminders = new ArrayList<>();
 
         try (Connection connection = DatabaseConnection.getConnection();
@@ -125,8 +125,9 @@ public class UserRepository {
                 int tgId = resultSet.getInt("tg_id");
                 String category = resultSet.getString("category");
                 Time activityTime = resultSet.getTime("activity_time");
+                int streakNum = resultSet.getInt("streak_num");
 
-                reminders.add(new Reminder(tgId, category, activityTime));
+                reminders.add(new Reminder(tgId, category, activityTime, streakNum));
             }
 
             logger.log(Level.INFO, "Retrieved {0} reminders from the database", reminders.size());
@@ -138,8 +139,9 @@ public class UserRepository {
         return reminders;
     }
 
+
     public List<Reminder> getAllRemindersForUser(int tgId) {
-        String query = "SELECT a.category, a.activity_time FROM activities a JOIN users u ON a.user_id = u.id WHERE u.tg_id = ?";
+        String query = "SELECT a.category, a.activity_time, a.streak_num FROM activities a JOIN users u ON a.user_id = u.id WHERE u.tg_id = ?";
         List<Reminder> reminders = new ArrayList<>();
 
         try (Connection connection = DatabaseConnection.getConnection();
@@ -151,8 +153,9 @@ public class UserRepository {
             while (resultSet.next()) {
                 String category = resultSet.getString("category");
                 Time activityTime = resultSet.getTime("activity_time");
+                int streakNum = resultSet.getInt("streak_num");
 
-                reminders.add(new Reminder(tgId, category, activityTime));
+                reminders.add(new Reminder(tgId, category, activityTime, streakNum));
             }
 
             logger.log(Level.INFO, "Retrieved {0} reminders for user {1} from the database", new Object[]{reminders.size(), tgId});
@@ -163,6 +166,7 @@ public class UserRepository {
 
         return reminders;
     }
+
 
     public void deleteActivity(int tgId, String category) {
         String query = "DELETE FROM activities WHERE user_id = (SELECT id FROM Users WHERE tg_id = ?) AND category = ?";
@@ -181,15 +185,73 @@ public class UserRepository {
         }
     }
 
+    public void incrementStreakNum(int tgId, String category) {
+        String query = "UPDATE activities SET streak_num = streak_num + 1 WHERE user_id = (SELECT id FROM Users WHERE tg_id = ?) AND category = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, tgId);
+            statement.setString(2, category);
+            statement.executeUpdate();
+
+            logger.log(Level.INFO, "Streak number incremented for userId={0}, category={1}", new Object[]{tgId, category});
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error incrementing streak number for userId=" + tgId + ", category=" + category, e);
+        }
+    }
+
+    public void resetStreakNum(int tgId, String category) {
+        String query = "UPDATE activities SET streak_num = 0 WHERE user_id = (SELECT id FROM Users WHERE tg_id = ?) AND category = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, tgId);
+            statement.setString(2, category);
+            statement.executeUpdate();
+
+            logger.log(Level.INFO, "Streak number reset for userId={0}, category={1}", new Object[]{tgId, category});
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error resetting streak number for userId=" + tgId + ", category=" + category, e);
+        }
+    }
+
+    public int getStreakNum(int tgId, String category) {
+        String query = "SELECT streak_num FROM activities a JOIN Users u ON a.user_id = u.id WHERE u.tg_id = ? AND a.category = ?";
+        int streakNum = 0;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, tgId);
+            statement.setString(2, category);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                streakNum = resultSet.getInt("streak_num");
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error retrieving streak number for userId=" + tgId + ", category=" + category, e);
+        }
+
+        return streakNum;
+    }
+
     public static class Reminder {
         private final int userId;
         private final String category;
         private final Time activityTime;
+        private final int streakNum;
 
-        public Reminder(int userId, String category, Time activityTime) {
+        public Reminder(int userId, String category, Time activityTime, int streakNum) {
             this.userId = userId;
             this.category = category;
             this.activityTime = activityTime;
+            this.streakNum = streakNum;
         }
 
         public int getUserId() {
@@ -203,5 +265,10 @@ public class UserRepository {
         public Time getActivityTime() {
             return activityTime;
         }
+
+//        public int getStreakNum() {
+//            return streakNum;
+//        }
     }
+
 }

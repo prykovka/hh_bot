@@ -1,9 +1,11 @@
 package org.example.reminder;
 
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.example.database.UserRepository;
-import org.example.menu.MessageTemplates;
+import org.example.templates.messages.MessagesTemplates;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 
@@ -29,9 +31,15 @@ public class ReminderJob implements Job {
         String category = context.getJobDetail().getJobDataMap().getString("category");
         String userName = userRepository.getUserNameByTgId(userId);
 
-        String messageText = MessageTemplates.getRandomMessage(category, userName);
+        String messageText = MessagesTemplates.getRandomMessage(category, userName);
 
-        SendMessage message = new SendMessage(userId, messageText);
+        InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(
+                new InlineKeyboardButton("✅").callbackData("complete_" + category),
+                new InlineKeyboardButton("❌").callbackData("miss_" + category)
+        );
+
+        SendMessage message = new SendMessage(userId, messageText)
+                .replyMarkup(inlineKeyboard);
 
         try {
             bot.execute(message);
