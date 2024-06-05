@@ -4,9 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * Класс Facts предоставляет случайные факты по различным категориям.
+ */
 public class Facts {
     private static final Map<String, String[]> facts = new HashMap<>();
     private static final Random random = new Random();
+
+    private Facts() {
+    }
 
     static {
         facts.put("water", new String[]{
@@ -32,6 +38,12 @@ public class Facts {
         });
     }
 
+    /**
+     * Возвращает случайный факт по указанной категории.
+     *
+     * @param category Категория, для которой требуется получить факт.
+     * @return Случайный факт из указанной категории.
+     */
     public static String getRandomFact(String category) {
         if (!facts.containsKey(category)) {
             return "Нет фактов для этой категории.";

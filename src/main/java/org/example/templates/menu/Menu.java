@@ -3,7 +3,19 @@ package org.example.templates.menu;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 
+/**
+ * Класс Menu предоставляет методы для создания меню с кнопками для взаимодействия с пользователями.
+ */
 public class Menu {
+
+    private Menu(){
+    }
+
+    /**
+     * Создает меню для выбора категории привычек.
+     *
+     * @return InlineKeyboardMarkup с кнопками для выбора категории привычек.
+     */
     public static InlineKeyboardMarkup getCategoryMenu() {
         return new InlineKeyboardMarkup(
                 new InlineKeyboardButton[]{
@@ -17,6 +29,11 @@ public class Menu {
         );
     }
 
+    /**
+     * Создает меню для выбора категории фактов.
+     *
+     * @return InlineKeyboardMarkup с кнопками для выбора категории фактов.
+     */
     public static InlineKeyboardMarkup getFactsMenu() {
         return new InlineKeyboardMarkup(
                 new InlineKeyboardButton[]{

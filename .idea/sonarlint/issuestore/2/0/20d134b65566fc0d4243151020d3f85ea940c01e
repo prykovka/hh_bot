@@ -1,13 +1,9 @@
 
-ˆ
-java:S1192"GDefine a constant instead of duplicating this literal "group-" 4 times.(ñËâ³ûÿÿÿÿJ$fb4912df-c722-4b65-b42f-bca02e70e87f
+
+java:S1192)"GDefine a constant instead of duplicating this literal "group-" 4 times.(ñËâ³ûÿÿÿÿ8Á€£ş1J$341a4af6-eb18-4499-9566-9743f2152f97
+s
+java:S18740"0Remove this use of "getHours"; it is deprecated.(òâù¤8Ä€£ş1J$746f7c57-2073-4960-8ada-6b1eacf5ba6a
 u
-java:S1118":Add a private constructor to hide the implicit public one.(áÒÃJ$210d2e45-2bc4-4780-a1e2-bfc5e4641162
-l
-java:S1874#"0Remove this use of "getHours"; it is deprecated.(òâù¤J$f8e0087d-91e9-4cbb-a911-45f56acc2729
-n
-java:S1874#"2Remove this use of "getMinutes"; it is deprecated.(òâù¤J$684ed3a1-572b-4d8f-9f6f-71c867efc92e
-u
-java:S3457,"4Lambda should be used to defer string concatenation.(£ĞûÿÿÿÿJ$4cf8c552-5f9b-46f9-b7f6-e59f26dfa288
-•
-java:S1128"TRemove this unnecessary import: same package classes are always implicitly imported.(»×¢¾ûÿÿÿÿJ$8a1fb528-2a68-4ab2-8b08-f0495b48c0d7
+java:S18740"2Remove this use of "getMinutes"; it is deprecated.(òâù¤8Ä€£ş1J$5c7cddab-1fa7-447c-a542-0e74beaa6da1
+|
+java:S34579"4Lambda should be used to defer string concatenation.(£Ğûÿÿÿÿ8Å€£ş1J$a37de708-0911-42ec-a2e8-6dad9af198dd

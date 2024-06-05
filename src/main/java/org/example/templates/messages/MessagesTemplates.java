@@ -4,7 +4,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * Класс MessagesTemplates предоставляет шаблоны сообщений для различных категорий напоминаний.
+ */
 public class MessagesTemplates {
+
+    private MessagesTemplates(){
+    }
+
+    // Шаблоны сообщений для различных категорий
     private static final Map<String, List<String>> TEMPLATES = Map.of(
             "water", List.of(
                     "%s, выпей стакан воды и твоя мама будет жить вечно\uD83D\uDCA6",
@@ -27,8 +35,17 @@ public class MessagesTemplates {
                     "%s, время для чтения! Найди минутку для книги\uD83D\uDCDA"
             )
     );
+
+    // Генератор случайных чисел
     private static final Random RANDOM = new Random();
 
+    /**
+     * Возвращает случайное сообщение для заданной категории и имени пользователя.
+     *
+     * @param category Категория сообщения (например, "water", "exercise", "sleep", "read").
+     * @param userName Имя пользователя, которое будет вставлено в сообщение.
+     * @return Случайное сообщение для указанной категории, содержащее имя пользователя.
+     */
     public static String getRandomMessage(String category, String userName) {
         List<String> messages = TEMPLATES.get(category);
         if (messages != null && !messages.isEmpty()) {

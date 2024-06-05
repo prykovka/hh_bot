@@ -1,0 +1,31 @@
+
+–
+java:S1192l"NDefine a constant instead of duplicating this literal "activity_time" 3 times.(Ù·ãÂıÿÿÿÿ8Ô›©¢ş1J$a70506c2-f495-476f-b10c-ea46f7f1bd1e
+
+java:S1192?"LDefine a constant instead of duplicating this literal ", category=" 7 times.(…²ÑŞ8Ô›©¢ş1J$92504375-f093-4b5f-9e5e-ab39cbc0c1fd
+”
+java:S1192›"KDefine a constant instead of duplicating this literal "streak_num" 3 times.(ôÏ–¡şÿÿÿÿ8Ô›©¢ş1J$3a3fb12b-280f-4750-9e51-6c71dfeb005b
+|
+java:S3457""4Lambda should be used to defer string concatenation.(ë„æŸûÿÿÿÿ8Ş›©¢ş1J$7cfde7d9-7b1e-4f8c-ac63-41354e6ea6d2
+w
+java:S3457?"4Lambda should be used to defer string concatenation.(…²ÑŞ8â›©¢ş1J$962640ca-603b-4f08-99d6-c2322d4673c7
+|
+java:S3457X"4Lambda should be used to defer string concatenation.(ä‹Ÿòÿÿÿÿÿ8ä›©¢ş1J$1d25784a-5420-45e2-9437-42c86121b89c
+w
+java:S3457r"4Lambda should be used to defer string concatenation.(§í‡¾8å›©¢ş1J$e8ea8b52-3eda-4561-a1dd-d18ae1e35f79
+}
+java:S3457ˆ"4Lambda should be used to defer string concatenation.( •ÜÕüÿÿÿÿ8æ›©¢ş1J$594b8aef-eb5e-48b7-bb21-e96fecafd242
+w
+java:S1481›".Remove this unused "streakNum" local variable.(ôÏ–¡şÿÿÿÿ8˜“õ£ş1J$e9ec34b5-9c68-4eaf-beb4-151dfba87980
+w
+java:S1481µ".Remove this unused "streakNum" local variable.(ôÏ–¡şÿÿÿÿ8™“õ£ş1J$1ee3df22-59b3-492f-ac9e-2d2c6718bc8f
+}
+java:S3457º"4Lambda should be used to defer string concatenation.(éõÖÄùÿÿÿÿ8è›©¢ş1J$c6838475-07f0-4237-b91a-47309ce4d1fb
+x
+java:S3457Î"4Lambda should be used to defer string concatenation.(ú¨â8é›©¢ş1J$1c1ec160-3111-45ef-9eb3-5206d069680d
+x
+java:S3457á"4Lambda should be used to defer string concatenation.(Áõ‡Ô8ê›©¢ş1J$cd0477b9-c66a-4a1f-a150-d6bdada75087
+x
+java:S3457ô"4Lambda should be used to defer string concatenation.(ç‚¯ 8ë›©¢ş1J$7c67963c-1ebd-4229-8832-5c3936fc0a8b
+x
+java:S3457Œ"4Lambda should be used to defer string concatenation.(Òø‘Ü8ë›©¢ş1J$a19f1de1-08ad-41db-9564-a39dd0336a49
