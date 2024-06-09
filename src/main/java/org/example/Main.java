@@ -64,7 +64,7 @@ public class Main {
         bot.setUpdatesListener(updates -> {
             for (Update update : updates) {
                 if (update.message() != null && update.message().text() != null) {
-                    MessageHandler.handleIncomingMessage(bot, update);
+                    MessageHandler.handleIncomingMessage(update);
                 } else if (update.callbackQuery() != null) {
                     CallbackQueryHandler.handleCallbackQuery(bot, update, userRepository, categoryTranslations);
                 }
@@ -73,6 +73,5 @@ public class Main {
         });
 
         ReminderScheduler.scheduleExistingReminders(userRepository);
-
     }
 }

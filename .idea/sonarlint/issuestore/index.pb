@@ -57,3 +57,10 @@ i
 0src/main/java/org/example/reminder/Reminder.java,a/5/a5c007ef3eba1824610325de7b54baeaf7c149f4
 h
 8src/main/java/org/example/repository/UserRepository.java,6/a/6ac2338be643e4a3aa5f2a926e5f1909e7404f26
+^
+.src/main/java/org/example/job/ReminderJob.java,f/1/f1c02d10cb318ae64b10de4821c66b901dda2271
+:
+
+.gitignore,a/5/a5cc2925ca8258af241be7e5b0381edf30266302
+7
+pom.xml,4/4/442292b8a7efeabbe4cc176709b833b1792140ec

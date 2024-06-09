@@ -13,7 +13,6 @@ import org.example.handler.MessageHandler;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Класс для обработки Callback Query в Telegram боте.
@@ -32,15 +31,19 @@ public class CallbackQueryHandler {
      */
     public static void handleCallbackQuery(TelegramBot bot, Update update, UserRepository userRepository, Map<String, String> categoryTranslations) {
         String callbackData = update.callbackQuery().data();
-        int chatId = update.callbackQuery().message().chat().id().intValue();
-        int messageId = update.callbackQuery().message().messageId();
+        if (update.message() != null && update.message().chat() != null) {
+            long chatId = update.message().chat().id();
+            int messageId = update.message().messageId();
 
-        if (categoryTranslations.containsKey(callbackData)) {
-            handleCategoryCallback(bot, userRepository, categoryTranslations, callbackData, chatId, messageId);
-        } else if (callbackData.equals("no_change")) {
-            bot.execute(new DeleteMessage(chatId, messageId));
+            if (categoryTranslations.containsKey(callbackData)) {
+                handleCategoryCallback(bot, userRepository, categoryTranslations, callbackData, chatId);
+            } else if (callbackData.equals("no_change")) {
+                bot.execute(new DeleteMessage(chatId, messageId));
+            } else {
+                MessageHandler.handleCallbackQuery(update);
+            }
         } else {
-            MessageHandler.handleCallbackQuery(update);
+            System.out.println("CallbackQuery does not contain a valid message or chat.");
         }
     }
 
@@ -52,12 +55,11 @@ public class CallbackQueryHandler {
      * @param categoryTranslations Категории.
      * @param callbackData         Данные из Callback Query.
      * @param chatId               Идентификатор чата.
-     * @param messageId            Идентификатор сообщения.
      */
-    private static void handleCategoryCallback(TelegramBot bot, UserRepository userRepository, Map<String, String> categoryTranslations, String callbackData, int chatId, int messageId) {
+    private static void handleCategoryCallback(TelegramBot bot, UserRepository userRepository, Map<String, String> categoryTranslations, String callbackData, long chatId) {
         MessageHandler.setCurrentCategory(callbackData);
-        Optional<Time> existingTime = userRepository.getActivityTime(chatId, callbackData);
-        if (existingTime.isPresent()) {
+        Time existingTime = userRepository.getActivityTime(chatId, callbackData).orElse(null);
+        if (existingTime != null) {
             sendExistingReminderMessage(bot, categoryTranslations, callbackData, chatId, existingTime);
         } else {
             sendTimeRequestMessage(bot, chatId);
@@ -73,7 +75,7 @@ public class CallbackQueryHandler {
      * @param chatId               Идентификатор чата.
      * @param existingTime         Существующее время напоминания.
      */
-    private static void sendExistingReminderMessage(TelegramBot bot, Map<String, String> categoryTranslations, String callbackData, int chatId, Optional<Time> existingTime) {
+    private static void sendExistingReminderMessage(TelegramBot bot, Map<String, String> categoryTranslations, String callbackData, long chatId, Time existingTime) {
         String translatedCategory = categoryTranslations.get(callbackData);
         String formattedTime = new SimpleDateFormat("HH:mm").format(existingTime);
         InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(
@@ -91,7 +93,7 @@ public class CallbackQueryHandler {
      * @param bot    TelegramBot.
      * @param chatId Идентификатор чата.
      */
-    private static void sendTimeRequestMessage(TelegramBot bot, int chatId) {
+    private static void sendTimeRequestMessage(TelegramBot bot, long chatId) {
         SendMessage requestTimeMessage = new SendMessage(chatId, "Выбери время в формате HH:MM (например, 17:30)")
                 .replyMarkup(new ForceReply());
         bot.execute(requestTimeMessage);

@@ -1,7 +1,2 @@
 
-Q
-java:S1874#"/Remove this use of "message"; it is deprecated.(…½äùÿÿÿÿ8¯ÚÍéÿ1
-Q
-java:S1874$"/Remove this use of "message"; it is deprecated.(ƒ°³İûÿÿÿÿ8°ÚÍéÿ1
-R
-java:S11729"0Remove this unused method parameter "messageId".(€Ûâïÿÿÿÿÿ8³ÚÍéÿ1
+r	java:S106."+Replace this use of System.out by a logger.(ÏêıÇøÿÿÿÿ8ï€¼ìÿ1J$ae8d1094-cca9-4475-b931-55cd2ce322bf

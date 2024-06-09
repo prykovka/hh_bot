@@ -50,7 +50,7 @@ public class ConfigLoader {
             try {
                 return Integer.parseInt(value);
             } catch (NumberFormatException e) {
-                logger.log(Level.SEVERE, "Неыозможно обработать: " + key, e);
+                logger.log(Level.SEVERE, "Невозможно обработать: " + key + ". Причина: " + e);
             }
         }
         return 0;

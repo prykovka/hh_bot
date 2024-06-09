@@ -7,6 +7,7 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
 import java.sql.Time;
+import java.time.LocalTime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,7 +37,7 @@ public class ReminderScheduler {
      * @param category     Категория напоминания.
      * @param activityTime Время напоминания.
      */
-    public static void scheduleReminder(int userId, String category, Time activityTime) {
+    public static void scheduleReminder(long userId, String category, Time activityTime) {
         try {
             JobDetail job = JobBuilder.newJob(ReminderJob.class)
                     .withIdentity("job-" + userId + "-" + category, "group-" + userId)
@@ -44,9 +45,13 @@ public class ReminderScheduler {
                     .usingJobData("category", category)
                     .build();
 
+            LocalTime localTime = activityTime.toLocalTime();
+            int hours = localTime.getHour();
+            int minutes = localTime.getMinute();
+
             Trigger trigger = TriggerBuilder.newTrigger()
                     .withIdentity("trigger-" + userId + "-" + category, "group-" + userId)
-                    .withSchedule(CronScheduleBuilder.dailyAtHourAndMinute(activityTime.getHours(), activityTime.getMinutes()))
+                    .withSchedule(CronScheduleBuilder.dailyAtHourAndMinute(hours, minutes))
                     .build();
 
             if (scheduler.checkExists(new JobKey("job-" + userId + "-" + category, "group-" + userId))) {
@@ -55,7 +60,7 @@ public class ReminderScheduler {
 
             scheduler.scheduleJob(job, trigger);
         } catch (SchedulerException e) {
-            logger.log(Level.SEVERE, "Ошибка установки напоминания userId=" + userId + ", category=" + category, e);
+            logger.log(Level.SEVERE, e, () ->  "Ошибка установки напоминания userId=" + userId + ", category=" + category);
         }
     }
 
@@ -67,7 +72,7 @@ public class ReminderScheduler {
     public static void scheduleExistingReminders(UserRepository userRepository) {
         try {
             for (Reminder reminder : userRepository.getAllReminders()) {
-                scheduleReminder(reminder.getUserId(), reminder.getCategory(), reminder.getActivityTime());
+                scheduleReminder(reminder.userId(), reminder.category(), reminder.activityTime());
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Ошибка получения существующих напоминаний", e);

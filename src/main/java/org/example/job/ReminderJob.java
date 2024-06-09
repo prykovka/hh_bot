@@ -63,7 +63,7 @@ public class ReminderJob implements Job {
             bot.execute(message);
             logger.log(Level.INFO, "Напминание отправлено успешно userId={0}", userId);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Не удалось отправить сообщение userId=" + userId, e);
+            logger.log(Level.SEVERE, e, () ->  "Не удалось отправить сообщение userId=" + userId);
         }
     }
 }

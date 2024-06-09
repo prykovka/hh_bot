@@ -1,31 +1,5 @@
 
-p
-java:S1192l"NDefine a constant instead of duplicating this literal "activity_time" 3 times.(Ù·ãÂıÿÿÿÿ8òÜÍéÿ1
-i
-java:S1192?"LDefine a constant instead of duplicating this literal ", category=" 7 times.(…²ÑŞ8òÜÍéÿ1
-n
-java:S1192›"KDefine a constant instead of duplicating this literal "streak_num" 3 times.(ôÏ–¡şÿÿÿÿ8òÜÍéÿ1
-V
-java:S3457""4Lambda should be used to defer string concatenation.(ë„æŸûÿÿÿÿ8ùÜÍéÿ1
-Q
-java:S3457?"4Lambda should be used to defer string concatenation.(…²ÑŞ8ıÜÍéÿ1
-V
-java:S3457X"4Lambda should be used to defer string concatenation.(ä‹Ÿòÿÿÿÿÿ8ÿÜÍéÿ1
-Q
-java:S3457r"4Lambda should be used to defer string concatenation.(§í‡¾8İÍéÿ1
-W
-java:S3457ˆ"4Lambda should be used to defer string concatenation.( •ÜÕüÿÿÿÿ8ƒİÍéÿ1
-Q
-java:S1481›".Remove this unused "streakNum" local variable.(ôÏ–¡şÿÿÿÿ8†İÍéÿ1
-Q
-java:S1481µ".Remove this unused "streakNum" local variable.(ôÏ–¡şÿÿÿÿ8‡İÍéÿ1
-W
-java:S3457º"4Lambda should be used to defer string concatenation.(éõÖÄùÿÿÿÿ8ˆİÍéÿ1
-R
-java:S3457Î"4Lambda should be used to defer string concatenation.(ú¨â8‰İÍéÿ1
-R
-java:S3457á"4Lambda should be used to defer string concatenation.(Áõ‡Ô8ŠİÍéÿ1
-R
-java:S3457ô"4Lambda should be used to defer string concatenation.(ç‚¯ 8‹İÍéÿ1
-R
-java:S3457Œ"4Lambda should be used to defer string concatenation.(Òø‘Ü8ŒİÍéÿ1
+–
+java:S1192~"NDefine a constant instead of duplicating this literal "activity_time" 3 times.(Ù·ãÂıÿÿÿÿ8êÃÈëÿ1J$0544f441-115d-4337-9aed-a9320f14dff9
+”
+java:S1192Q"LDefine a constant instead of duplicating this literal ", category=" 7 times.(£à„ûÿÿÿÿÿ8ïÑØëÿ1J$6b0e5544-77db-4d69-b7c3-1531ab52389d

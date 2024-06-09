@@ -2,6 +2,7 @@ package org.example.handler;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.ForceReply;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.SendMessage;
@@ -29,11 +30,15 @@ public class MessageHandler {
     private static TelegramBot bot;
     private static UserRepository userRepository;
     private static String currentCategory;
-    private static final Map<Integer, Boolean> awaitingFeedback = new HashMap<>();
+    private static final Map<Long, Boolean> awaitingFeedback = new HashMap<>();
+    private static final Map<Long, Boolean> awaitingName = new HashMap<>();
     private static int adminId;
 
     private MessageHandler() {
+        // Приватный конструктор для предотвращения инстанцирования
     }
+
+    // Геттеры и сеттеры для приватных полей
 
     /**
      * Устанавливает объект Telegram бота.
@@ -65,16 +70,20 @@ public class MessageHandler {
     /**
      * Обрабатывает входящие сообщения от Telegram бота.
      *
-     * @param bot    объект Telegram бота.
      * @param update объект обновления Telegram.
      */
-    public static void handleIncomingMessage(TelegramBot bot, Update update) {
+    public static void handleIncomingMessage(Update update) {
         String messageText = update.message().text();
-        int chatId = update.message().chat().id().intValue();
+        long chatId = update.message().chat().id().intValue();
         String userName = update.message().chat().username();
 
         if (Boolean.TRUE.equals(awaitingFeedback.getOrDefault(chatId, Boolean.FALSE))) {
             handleFeedback(chatId, userName, messageText);
+            return;
+        }
+
+        if (Boolean.TRUE.equals(awaitingName.getOrDefault(chatId, Boolean.FALSE))) {
+            handleNameUpdate(chatId, messageText);
             return;
         }
 
@@ -95,7 +104,7 @@ public class MessageHandler {
      * @param userName   Имя пользователя.
      * @param messageText Текст сообщения.
      */
-    private static void handleFeedback(int chatId, String userName, String messageText) {
+    private static void handleFeedback(long chatId, String userName, String messageText) {
         awaitingFeedback.put(chatId, false);
         SendMessage feedbackMessage = new SendMessage(adminId, "Отзыв от @" + userName + ":\n" + messageText);
         bot.execute(feedbackMessage);
@@ -109,7 +118,7 @@ public class MessageHandler {
      * @param chatId   ID чата.
      * @param userName Имя пользователя.
      */
-    private static void handleStartCommand(int chatId, String userName) {
+    private static void handleStartCommand(long chatId, String userName) {
         userRepository.addUser(chatId, userName);
         logger.log(Level.INFO, "Получена /start от: chatId={0}, userName={1}", new Object[]{chatId, userName});
         String welcomeText = """
@@ -129,7 +138,7 @@ public class MessageHandler {
      *
      * @param chatId ID чата.
      */
-    private static void handleMenuCommand(int chatId) {
+    private static void handleMenuCommand(long chatId) {
         SendMessage menuMessage = new SendMessage(chatId, "Выбери полезное дело:").replyMarkup(Menu.getCategoryMenu());
         bot.execute(menuMessage);
     }
@@ -139,7 +148,7 @@ public class MessageHandler {
      *
      * @param chatId ID чата.
      */
-    private static void handleStreakCommand(int chatId) {
+    private static void handleStreakCommand(long chatId) {
         List<Reminder> reminders = userRepository.getAllRemindersForUser(chatId);
         StringBuilder messageText = new StringBuilder("*Вот твои полезные привычки:*\n\n");
 
@@ -148,9 +157,9 @@ public class MessageHandler {
         } else {
             SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
             for (Reminder reminder : reminders) {
-                String translatedCategory = Main.categoryTranslations.getOrDefault(reminder.getCategory(), reminder.getCategory());
-                String formattedTime = timeFormat.format(reminder.getActivityTime());
-                int streakNum = userRepository.getStreakNum(chatId, reminder.getCategory());
+                String translatedCategory = Main.categoryTranslations.getOrDefault(reminder.category(), reminder.category());
+                String formattedTime = timeFormat.format(reminder.activityTime());
+                int streakNum = userRepository.getStreakNum(chatId, reminder.category());
                 messageText.append(translatedCategory).append(" - ").append(formattedTime).append(" - ").append(streakNum).append(" дней\n");
             }
         }
@@ -165,7 +174,7 @@ public class MessageHandler {
      *
      * @param chatId ID чата.
      */
-    private static void handleFactsCommand(int chatId) {
+    private static void handleFactsCommand(long chatId) {
         SendMessage factsMenuMessage = new SendMessage(chatId, "Выбери категорию для получения факта:").replyMarkup(Menu.getFactsMenu());
         bot.execute(factsMenuMessage);
     }
@@ -175,7 +184,7 @@ public class MessageHandler {
      *
      * @param chatId ID чата.
      */
-    private static void handleFeedbackCommand(int chatId) {
+    private static void handleFeedbackCommand(long chatId) {
         awaitingFeedback.put(chatId, true);
         SendMessage feedbackRequestMessage = new SendMessage(chatId, "Пожалуйста, напиши свое искреннее мнение:");
         bot.execute(feedbackRequestMessage);
@@ -187,7 +196,7 @@ public class MessageHandler {
      * @param chatId     ID чата.
      * @param messageText Текст сообщения.
      */
-    private static void handleDefaultCommand(int chatId, String messageText) {
+    private static void handleDefaultCommand(long chatId, String messageText) {
         if (messageText.matches("^(?:[01]\\d|2[0-3]):[0-5]\\d$")) {
             Time activityTime = Time.valueOf(messageText + ":00");
             handleTimeInput(chatId, activityTime);
@@ -203,7 +212,7 @@ public class MessageHandler {
      * @param chatId       ID чата.
      * @param activityTime Время действия.
      */
-    private static void handleTimeInput(int chatId, Time activityTime) {
+    private static void handleTimeInput(long chatId, Time activityTime) {
         if (currentCategory != null) {
             Optional<Time> existingTime = userRepository.getActivityTime(chatId, currentCategory);
             String translatedCategory = Main.categoryTranslations.getOrDefault(currentCategory, currentCategory);
@@ -232,36 +241,44 @@ public class MessageHandler {
      * @param update объект обновления Telegram.
      */
     public static void handleCallbackQuery(Update update) {
-        String callbackData = update.callbackQuery().data();
-        int chatId = update.callbackQuery().message().chat().id().intValue();
-        int messageId = update.callbackQuery().message().messageId();
+        if (update.callbackQuery() != null && update.message() != null && update.message().chat() != null) {
+            String callbackData = update.callbackQuery().data();
+            long chatId = update.message().chat().id();
+            int messageId = update.message().messageId();
 
-        if (callbackData.startsWith("fact_")) {
-            handleFactCallback(chatId, callbackData);
-        } else if (callbackData.startsWith("delete_")) {
-            handleDeleteCallback(chatId, callbackData);
-        } else if (callbackData.startsWith("complete_")) {
-            handleCompleteCallback(chatId, callbackData, messageId);
-        } else if (callbackData.startsWith("miss_")) {
-            handleMissCallback(chatId, callbackData, messageId);
+            if (callbackData.startsWith("fact_")) {
+                handleFactCallback(chatId, callbackData);
+            } else if (callbackData.startsWith("delete_")) {
+                handleDeleteCallback(chatId, callbackData);
+            } else if (callbackData.startsWith("complete_")) {
+                handleCompleteCallback(chatId, callbackData, messageId);
+            } else if (callbackData.startsWith("miss_")) {
+                handleMissCallback(chatId, callbackData, messageId);
+            } else if (callbackData.equals("yes_name")) {
+                SendMessage message = new SendMessage(chatId, "Как мне тебя называть?").replyMarkup(new ForceReply());
+                awaitingName.put(chatId, true);
+                bot.execute(message);
+            }
+        } else {
+            logger.log(Level.WARNING, "CallbackQuery does not contain a valid message or chat.");
         }
     }
 
-    private static void handleFactCallback(int chatId, String callbackData) {
+    private static void handleFactCallback(long chatId, String callbackData) {
         String category = callbackData.replace("fact_", "");
         String fact = Facts.getRandomFact(category);
         SendMessage factMessage = new SendMessage(chatId, fact);
         bot.execute(factMessage);
     }
 
-    private static void handleDeleteCallback(int chatId, String callbackData) {
+    private static void handleDeleteCallback(long chatId, String callbackData) {
         String category = callbackData.replace("delete_", "");
         userRepository.deleteActivity(chatId, category);
         SendMessage deleteConfirmationMessage = new SendMessage(chatId, "Твое напоминание для \"" + Main.categoryTranslations.get(category) + "\" было удалено.");
         bot.execute(deleteConfirmationMessage);
     }
 
-    private static void handleCompleteCallback(int chatId, String callbackData, int messageId) {
+    private static void handleCompleteCallback(long chatId, String callbackData, int messageId) {
         String category = callbackData.replace("complete_", "");
         userRepository.incrementStreakNum(chatId, category);
         bot.execute(new DeleteMessage(chatId, messageId));
@@ -270,7 +287,7 @@ public class MessageHandler {
         bot.execute(confirmationMessage);
     }
 
-    private static void handleMissCallback(int chatId, String callbackData, int messageId) {
+    private static void handleMissCallback(long chatId, String callbackData, int messageId) {
         String category = callbackData.replace("miss_", "");
         bot.execute(new DeleteMessage(chatId, messageId));
         int prevStreakNum = userRepository.getStreakNum(chatId, category);
@@ -286,5 +303,18 @@ public class MessageHandler {
      */
     public static void setCurrentCategory(String category) {
         currentCategory = category;
+    }
+
+    /**
+     * Обрабатывает обновление имени пользователя.
+     *
+     * @param chatId  ID чата.
+     * @param newName Новое имя пользователя.
+     */
+    private static void handleNameUpdate(long chatId, String newName) {
+        awaitingName.put(chatId, false);
+        userRepository.updateUserName(chatId, newName);
+        SendMessage thankYouMessage = new SendMessage(chatId, "Приятно познакомиться, " + newName + "!\nВот немного обо мне:\n/menu - Выбрать и настроить полезные привычки.\n/streak - Все запланированные напоминания и streak.\n/facts - Интересные факты о полезных привычках.\n/feedback - Оставить отзыв.");
+        bot.execute(thankYouMessage);
     }
 }
