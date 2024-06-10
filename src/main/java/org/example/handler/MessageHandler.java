@@ -74,7 +74,7 @@ public class MessageHandler {
      */
     public static void handleIncomingMessage(Update update) {
         String messageText = update.message().text();
-        long chatId = update.message().chat().id().intValue();
+        long chatId = update.message().chat().id();
         String userName = update.message().chat().username();
 
         if (Boolean.TRUE.equals(awaitingFeedback.getOrDefault(chatId, Boolean.FALSE))) {
@@ -131,6 +131,12 @@ public class MessageHandler {
         """;
         SendMessage welcomeMessage = new SendMessage(chatId, welcomeText).parseMode(ParseMode.Markdown);
         bot.execute(welcomeMessage);
+
+        // Запрос имени пользователя
+        SendMessage askNameMessage = new SendMessage(chatId, "Как мне тебя называть?")
+                .replyMarkup(new ForceReply());
+        bot.execute(askNameMessage);
+        awaitingName.put(chatId, true);
     }
 
     /**
@@ -241,28 +247,33 @@ public class MessageHandler {
      * @param update объект обновления Telegram.
      */
     public static void handleCallbackQuery(Update update) {
-        if (update.callbackQuery() != null && update.message() != null && update.message().chat() != null) {
+        if (update.callbackQuery() != null) {
             String callbackData = update.callbackQuery().data();
-            long chatId = update.message().chat().id();
-            int messageId = update.message().messageId();
+            if (update.callbackQuery().message() != null && update.callbackQuery().message().chat() != null) {
+                long chatId = update.callbackQuery().message().chat().id();
+                int messageId = update.callbackQuery().message().messageId();
 
-            if (callbackData.startsWith("fact_")) {
-                handleFactCallback(chatId, callbackData);
-            } else if (callbackData.startsWith("delete_")) {
-                handleDeleteCallback(chatId, callbackData);
-            } else if (callbackData.startsWith("complete_")) {
-                handleCompleteCallback(chatId, callbackData, messageId);
-            } else if (callbackData.startsWith("miss_")) {
-                handleMissCallback(chatId, callbackData, messageId);
-            } else if (callbackData.equals("yes_name")) {
-                SendMessage message = new SendMessage(chatId, "Как мне тебя называть?").replyMarkup(new ForceReply());
-                awaitingName.put(chatId, true);
-                bot.execute(message);
+                if (callbackData.startsWith("fact_")) {
+                    handleFactCallback(chatId, callbackData);
+                } else if (callbackData.startsWith("delete_")) {
+                    handleDeleteCallback(chatId, callbackData);
+                } else if (callbackData.startsWith("complete_")) {
+                    handleCompleteCallback(chatId, callbackData, messageId);
+                } else if (callbackData.startsWith("miss_")) {
+                    handleMissCallback(chatId, callbackData, messageId);
+                } else if (callbackData.equals("yes_name")) {
+                    SendMessage message = new SendMessage(chatId, "Как мне тебя называть?").replyMarkup(new ForceReply());
+                    awaitingName.put(chatId, true);
+                    bot.execute(message);
+                }
+            } else {
+                logger.log(Level.WARNING, "CallbackQuery does not contain a valid message or chat.");
             }
         } else {
-            logger.log(Level.WARNING, "CallbackQuery does not contain a valid message or chat.");
+            logger.log(Level.WARNING, "Update does not contain a valid callback query.");
         }
     }
+
 
     private static void handleFactCallback(long chatId, String callbackData) {
         String category = callbackData.replace("fact_", "");

@@ -88,11 +88,11 @@ public class UserRepository implements Serializable {
      * @param tgId Телеграм ID пользователя.
      * @return Optional с именем пользователя, если найден, иначе пустой Optional.
      */
-    public Optional<String> getUserNameByTgId(int tgId) {
+    public Optional<String> getUserNameByTgId(long tgId) {
         String query = "SELECT user_name FROM Users WHERE tg_id = ?";
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, tgId);
+            statement.setLong(1, tgId);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 String username = resultSet.getString("user_name");

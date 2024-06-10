@@ -1,2 +1,10 @@
 
-r	java:S106."+Replace this use of System.out by a logger.(ÏêıÇøÿÿÿÿ8ï€¼ìÿ1J$ae8d1094-cca9-4475-b931-55cd2ce322bf
+w
+java:S1874""/Remove this use of "message"; it is deprecated.(¹œŸĞşÿÿÿÿ8»½¢€2J$815268b5-d811-483b-9f64-4fd072460f7e
+w
+java:S1874""/Remove this use of "message"; it is deprecated.(¹œŸĞşÿÿÿÿ8”Ğ¢€2J$6a6fffa3-a6d7-466f-832c-da843d27a4da
+L
+java:S1874#"/Remove this use of "message"; it is deprecated.(ÿ»—¼8ğñ¢€2
+Q
+java:S1874$"/Remove this use of "message"; it is deprecated.(ƒ°³İûÿÿÿÿ8ğñ¢€2
+r	java:S106."+Replace this use of System.out by a logger.(ÏêıÇøÿÿÿÿ8¶ˆÑ€2J$8e6930e4-9b8a-4a76-ae2f-5a90078474e3

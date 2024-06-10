@@ -31,9 +31,9 @@ public class CallbackQueryHandler {
      */
     public static void handleCallbackQuery(TelegramBot bot, Update update, UserRepository userRepository, Map<String, String> categoryTranslations) {
         String callbackData = update.callbackQuery().data();
-        if (update.message() != null && update.message().chat() != null) {
-            long chatId = update.message().chat().id();
-            int messageId = update.message().messageId();
+        if (update.callbackQuery().message() != null && update.callbackQuery().message().chat() != null) {
+            long chatId = update.callbackQuery().message().chat().id();
+            int messageId = update.callbackQuery().message().messageId();
 
             if (categoryTranslations.containsKey(callbackData)) {
                 handleCategoryCallback(bot, userRepository, categoryTranslations, callbackData, chatId);

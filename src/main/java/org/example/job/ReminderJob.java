@@ -9,6 +9,7 @@ import org.example.templates.messages.MessagesTemplates;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,9 +46,10 @@ public class ReminderJob implements Job {
      */
     @Override
     public void execute(JobExecutionContext context) {
-        int userId = context.getJobDetail().getJobDataMap().getInt("userId");
+        long userId = context.getJobDetail().getJobDataMap().getLong("userId");  // Исправлено на long
         String category = context.getJobDetail().getJobDataMap().getString("category");
-        String userName = String.valueOf(userRepository.getUserNameByTgId(userId));
+        Optional<String> userNameOpt = userRepository.getUserNameByTgId(userId);
+        String userName = userNameOpt.orElse("User");
 
         String messageText = MessagesTemplates.getRandomMessage(category, userName);
 
@@ -61,9 +63,10 @@ public class ReminderJob implements Job {
 
         try {
             bot.execute(message);
-            logger.log(Level.INFO, "Напминание отправлено успешно userId={0}", userId);
+            logger.log(Level.INFO, "Напоминание отправлено успешно userId={0}", userId);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, e, () ->  "Не удалось отправить сообщение userId=" + userId);
+            logger.log(Level.SEVERE, e, () -> "Не удалось отправить сообщение userId=" + userId);
         }
     }
+
 }

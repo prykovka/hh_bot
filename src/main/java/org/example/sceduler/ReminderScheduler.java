@@ -41,7 +41,7 @@ public class ReminderScheduler {
         try {
             JobDetail job = JobBuilder.newJob(ReminderJob.class)
                     .withIdentity("job-" + userId + "-" + category, "group-" + userId)
-                    .usingJobData("userId", userId)
+                    .usingJobData("userId", userId)  // Исправлено на long
                     .usingJobData("category", category)
                     .build();
 
@@ -63,6 +63,7 @@ public class ReminderScheduler {
             logger.log(Level.SEVERE, e, () ->  "Ошибка установки напоминания userId=" + userId + ", category=" + category);
         }
     }
+
 
     /**
      * Планирует существующие напоминания для всех пользователей.
